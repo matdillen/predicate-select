@@ -119,3 +119,44 @@ puerki_stack <- function(resu,
     return(properties)
   }
 }
+
+stack_count <- function(resu,prop) {
+  new = tibble(id = NA,
+               snak = NA)
+  for (i in 1:length(resu)) {
+    for (j in 1:length(resu[[i]]$entities)) {
+      if (!is.null(resu[[i]]$entities[[j]]$claims[[prop]])) {
+        for (k in 1:length(resu[[i]]$entities[[j]]$claims[[prop]])) {
+          temp = tibble(id = names(resu[[i]]$entities)[[j]],
+                        snak = resu[[i]]$entities[[j]]$claims[[prop]][[k]]$mainsnak$datavalue$value$id)
+          new = rbind(new,temp)
+        }
+      }
+    }
+  }
+  new = new[-1,]
+  new$prop = prop
+  return(new)
+}
+
+get_items_with_prop <- function(data,prop,pid) {
+  sub = data %>%
+    cleanPIDS(which = prop)
+  
+  pubst = tibble(item = 0,itemLabel = 0,id=0)
+  for (i in 1:dim(sub)[1]) {
+    query <- paste0('SELECT ?item ?itemLabel WHERE 
+        {
+        ?item wdt:',pid,' \"',sub[[prop]][i],'\".
+        SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" }
+        }')
+    pubs = querki(query)
+    if (dim(pubs)[1]>0) {
+      pubs$id = sub[[prop]][i]
+      pubst = rbind(pubst,pubs)
+    }
+    print(i)
+  }
+  pubst = pubst[-1,]
+  return(pubst)
+}

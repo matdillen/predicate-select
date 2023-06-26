@@ -1,8 +1,10 @@
 library(tidyverse)
 library(magrittr)
-setwd("D:/apm/bicikl/7.3/predicate-select")
+setwd("D:/apm/bicikl/7.3/predicate-select/predicate-select")
 
-bp = list.files("botany_pilot",full.names = T)
+bp = list.files("botany_pilot",
+                full.names = T,
+                pattern="*.csv")
 
 for (i in 1:length(bp)) {
   if (i==1) {
@@ -41,3 +43,11 @@ resu.p = puerki(props2,which="props")
 props_ids = puerki_stack(resu.p,
                          which="labels")
 props2$id = props_ids
+
+occupation = stack_count(resu.r,"P106")
+
+occups = occupation %>%
+  count(snak) %>%
+  arrange(desc(n)) %>%
+  mutate(cum = cumsum(n),
+         cump = cum/sum(n))

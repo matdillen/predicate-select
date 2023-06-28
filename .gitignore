@@ -49,5 +49,6 @@ po/*~
 rsconnect/
 
 botany_pilot/*.csv
-predicate-select*.txt
 wikidata_props.json
+bionomia
+predicate-select*.txt

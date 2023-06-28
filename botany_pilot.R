@@ -2,7 +2,7 @@ library(tidyverse)
 library(magrittr)
 setwd("D:/apm/bicikl/7.3/predicate-select")
 
-bp = list.files("botany_pilot",full.names = T)
+bp = list.files("botany_pilot",full.names = T,pattern="*.csv")
 
 for (i in 1:length(bp)) {
   if (i==1) {

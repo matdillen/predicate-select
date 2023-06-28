@@ -2,30 +2,69 @@ library(tidyverse)
 library(magrittr)
 setwd("D:/apm/bicikl/7.3/predicate-select/predicate-select")
 #oc = read_tsv("occurrence.txt",quote="",col_types = cols(.default = "c"))
-pr = read_tsv("predicate-select2.txt",quote="",col_types = cols(.default = "c"))
+pr = read_tsv("predicate-select3.txt",quote="",col_types = cols(.default = "c"))
 
 source("clean_functions.R")
 
+oc_ori = pr %>%
+  count(datasetKey) %>%
+  arrange(desc(n)) %>%
+  mutate(cum = cumsum(n),
+         cump = cum/sum(n))
+
+oc_ori2 = pr %>%
+  filter(basisOfRecord!="OCCURRENCE") %>%
+  count(datasetKey) %>%
+  arrange(desc(n)) %>%
+  mutate(cum = cumsum(n),
+         cump = cum/sum(n))
+
+library(jsonlite)
+oc_ori2$name = NA
+for (i in 1:13) {
+  url = paste0("https://api.gbif.org/v1/dataset/",oc_ori2$datasetKey)
+  temp = fromJSON(url)
+  oc_ori2$name[i] = temp$title
+}
+
 oc_ids = pr %>%
   count(recordedByID) %>%
-  rename(identifier = recordedByID) 
+  rename(identifier = recordedByID)
 
 oc_ids2 = pr %>%
   count(identifiedByID) %>%
   rename(identifier = identifiedByID) %>%
   rbind(oc_ids) %>%
-  filter(!duplicated(identifier)) %>%
+  filter(!duplicated(identifier),
+         !is.na(identifier)) %>%
   classifyPIDS()
+
+count(oc_ids2,type) %>% arrange(desc(n))
 
 #filter(oc_ids2,type == "other") %>% count(identifier) %>% View()
 
 oc_ids3 = oc_ids2 %>%
-  filter(type!="int",type!="other") %>%
+  #filter(type!="int",type!="other") %>%
   separate_rows(identifier,sep=";") %>%
   #mutate(test = nchar(identifier)) %>%
   classifyPIDS()
 
-#count(oc_ids3,type) %>% arrange(desc(n))
+count(oc_ids3,type) %>% arrange(desc(n))
+
+oc_ids3 %>%
+  group_by(type) %>%
+  summarise(sum = sum(n)) %>%
+  arrange(desc(sum))
+
+oc_ids2 %>%
+  group_by(type) %>%
+  summarise(sum = sum(n)) %>%
+  arrange(desc(sum))
+
+others_temp = filter(oc_ids3,type=="int")
+others = pr %>%
+  filter((!grepl("[^0-9]",recordedByID)&!is.na(recordedByID))|
+           (!grepl("[^0-9]",identifiedByID)&!is.na(identifiedByID)))
 
 orcids = oc_ids3 %>%
   get_items_with_prop("orcid","P496")
@@ -36,13 +75,16 @@ viaf = oc_ids3 %>%
 ipni = oc_ids3 %>%
   get_items_with_prop("ipni","P586")
 
-checkids = pubst %>%
-  pull(item) %>%
-  c(pull(pubst2,item)) %>%
-  c(pull(pubst3,item)) %>%
+checkids = oc_ids3 %>%
+  cleanPIDS(which="wikidata") %>%
+  pull(wikidata) %>%
+  c(pull(orcids,item)) %>%
+  c(pull(viaf,item)) %>%
+  c(pull(ipni,item)) %>%
   tibble(ids = .) %>%
   distinct() %>%
-  mutate(ids = gsub(".*/","",ids))
+  mutate(ids = gsub(".*/","",ids),
+         ids = gsub("[^0-9|Q]","",ids))
 
 resu.r = puerki(checkids)
 
@@ -65,3 +107,5 @@ occups = occupation %>%
   arrange(desc(n)) %>%
   mutate(cum = cumsum(n),
          cump = cum/sum(n))
+
+resu.orcid = puerki(orcids,which = "id")

@@ -82,9 +82,9 @@ checkids = oc_ids3 %>%
   c(pull(viaf,item)) %>%
   c(pull(ipni,item)) %>%
   tibble(ids = .) %>%
-  distinct() %>%
   mutate(ids = gsub(".*/","",ids),
-         ids = gsub("[^0-9|Q]","",ids))
+         ids = gsub("[^0-9|Q]","",ids)) %>%
+  distinct()
 
 resu.r = puerki(checkids)
 

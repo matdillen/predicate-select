@@ -22,9 +22,9 @@ checkids_bn = bn_u%>%
   pull(wikidata) %>%
   c(pull(orcids,item)) %>%
   tibble(ids = .) %>%
-  distinct() %>%
   mutate(ids = gsub(".*/","",ids),
-         ids = gsub("[^0-9|Q]","",ids))
+         ids = gsub("[^0-9|Q]","",ids)) %>%
+  distinct()
 
 resu.bn = puerki(checkids_bn)
 

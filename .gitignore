@@ -52,3 +52,4 @@ botany_pilot/*.csv
 wikidata_props.json
 bionomia
 predicate-select*.txt
+*.json

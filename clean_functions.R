@@ -32,7 +32,8 @@ cleanPIDS <- function(data,which) {
     data %<>%
       filter(type=="wikidata") %>%
       mutate(wikidata = gsub(".*Q","",identifier),
-             wikidata = paste0("Q",wikidata))
+             wikidata = paste0("Q",wikidata),
+             wikidata = gsub("/.*","",wikidata))
     return(data)
   } else if (which == "viaf") {
     data %<>%
@@ -140,8 +141,10 @@ stack_count <- function(resu,prop) {
 }
 
 get_items_with_prop <- function(data,prop,pid) {
+  require(rlang)
   sub = data %>%
-    cleanPIDS(which = prop)
+    cleanPIDS(which = prop) %>%
+    filter(!duplicated(eval(parse_expr(prop))))
   
   pubst = tibble(item = 0,itemLabel = 0,id=0)
   for (i in 1:dim(sub)[1]) {

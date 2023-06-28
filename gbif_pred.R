@@ -108,4 +108,4 @@ occups = occupation %>%
   mutate(cum = cumsum(n),
          cump = cum/sum(n))
 
-resu.orcid = puerki(orcids,which = "id")
+#resu.orcid = puerki(orcids,which = "id")

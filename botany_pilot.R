@@ -1,7 +1,6 @@
 library(tidyverse)
 library(magrittr)
 library(jsonlite)
-setwd("D:/apm/bicikl/7.3/predicate-select/predicate-select")
 
 bp = list.files("botany_pilot",
                 full.names = T,
@@ -23,6 +22,8 @@ source("clean_functions.R")
 oc_u = filter(oc,!duplicated(recordedBy_IRI)) %>%
   rename(identifier = recordedBy_IRI) %>%
   classifyPIDS()
+
+count(oc_u,type) %>% arrange(desc(n)) %>% mutate(perc = n/sum(n))
 
 checkids = oc_u %>%
   filter(type == "wikidata") %>%

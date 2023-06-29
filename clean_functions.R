@@ -164,3 +164,22 @@ get_items_with_prop <- function(data,prop,pid) {
   pubst = pubst[-1,]
   return(pubst)
 }
+
+filter_items_with_prop <- function(data,prop,not=F) {
+  require(rlang)
+  
+  new = tibble(id = NA,
+               label = NA)
+  for (i in 1:length(data)) {
+    for (j in 1:length(data[[i]]$entities)) {
+      if ((!is.null(data[[i]]$entities[[j]]$claims[[prop]])&not==F)|
+          (is.null(data[[i]]$entities[[j]]$claims[[prop]])&not==T)) {
+          temp = tibble(id = names(data[[i]]$entities)[[j]],
+                        label = data[[i]]$entities[[j]]$labels$en$value)
+          new = rbind(new,temp)
+      }
+    }
+  }
+  new = new[-1,]
+  return(new)
+}

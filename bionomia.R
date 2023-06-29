@@ -8,6 +8,8 @@ bn_c = count(bn,Subject,Object)
 
 bn_ca = count(bn,Object,Predicate)
 
+bn_ca2 = count(bn,Object)
+
 bn_u = bn_ca %>%
   rename(identifier = Object) %>%
   classifyPIDS() %>%
@@ -54,3 +56,5 @@ occups_bn = occupation_bn %>%
          cump = cum/sum(n))
 
 resu.bn = fromJSON("bionomia.json",simplifyVector = F)
+
+notbio = filter_items_with_prop(resu.r,"P6944",T)

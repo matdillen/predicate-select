@@ -55,6 +55,6 @@ occups_bn = occupation_bn %>%
   mutate(cum = cumsum(n),
          cump = cum/sum(n))
 
-resu.bn = fromJSON("bionomia.json",simplifyVector = F)
+#resu.bn = fromJSON("bionomia.json",simplifyVector = F)
 
 notbio = filter_items_with_prop(resu.r,"P6944",T)

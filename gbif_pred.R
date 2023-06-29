@@ -21,8 +21,8 @@ oc_ori2 = pr %>%
 
 library(jsonlite)
 oc_ori2$name = NA
-for (i in 1:13) {
-  url = paste0("https://api.gbif.org/v1/dataset/",oc_ori2$datasetKey)
+for (i in 1:dim(oc_ori2)[1]) {
+  url = paste0("https://api.gbif.org/v1/dataset/",oc_ori2$datasetKey[i])
   temp = fromJSON(url)
   oc_ori2$name[i] = temp$title
 }
@@ -82,8 +82,7 @@ checkids = oc_ids3 %>%
   c(pull(viaf,item)) %>%
   c(pull(ipni,item)) %>%
   tibble(ids = .) %>%
-  mutate(ids = gsub(".*/","",ids),
-         ids = gsub("[^0-9|Q]","",ids)) %>%
+  mutate(ids = gsub(".*/","",ids)) %>%
   distinct()
 
 resu.r = puerki(checkids)
@@ -100,6 +99,10 @@ props_ids = puerki_stack(resu.p,
                          which="labels")
 props2$id = props_ids
 
+props2 %<>%
+  arrange(desc(n)) %>%
+  mutate(perc = n/max(props2$n))
+
 occupation = stack_count(resu.r,"P106")
 
 occups = occupation %>%
@@ -109,3 +112,7 @@ occups = occupation %>%
          cump = cum/sum(n))
 
 #resu.orcid = puerki(orcids,which = "id")
+oc_ids3 %>% cleanPIDS(which="wikidata") %>% filter(!duplicated(wikidata)) %>% dim()
+oc_ids3 %>% cleanPIDS(which="orcid") %>% filter(!duplicated(orcid)) %>% dim()
+oc_ids3 %>% cleanPIDS(which="viaf") %>% filter(!duplicated(viaf)) %>% dim()
+oc_ids3 %>% cleanPIDS(which="ipni") %>% filter(!duplicated(ipni)) %>% dim()

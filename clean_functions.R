@@ -33,7 +33,8 @@ cleanPIDS <- function(data,which) {
       filter(type=="wikidata") %>%
       mutate(wikidata = gsub(".*Q","",identifier),
              wikidata = paste0("Q",wikidata),
-             wikidata = gsub("/.*","",wikidata))
+             wikidata = gsub("/.*","",wikidata),
+             wikidata = gsub("[^0-9|Q]","",wikidata))
     return(data)
   } else if (which == "viaf") {
     data %<>%

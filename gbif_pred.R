@@ -1,6 +1,6 @@
 library(tidyverse)
 library(magrittr)
-setwd("D:/apm/bicikl/7.3/predicate-select/predicate-select")
+library(jsonlite)
 #oc = read_tsv("occurrence.txt",quote="",col_types = cols(.default = "c"))
 pr = read_tsv("predicate-select3.txt",quote="",col_types = cols(.default = "c"))
 
@@ -116,3 +116,5 @@ oc_ids3 %>% cleanPIDS(which="wikidata") %>% filter(!duplicated(wikidata)) %>% di
 oc_ids3 %>% cleanPIDS(which="orcid") %>% filter(!duplicated(orcid)) %>% dim()
 oc_ids3 %>% cleanPIDS(which="viaf") %>% filter(!duplicated(viaf)) %>% dim()
 oc_ids3 %>% cleanPIDS(which="ipni") %>% filter(!duplicated(ipni)) %>% dim()
+
+resu.r = fromJSON("gbif-pred-wd-results.json",simplifyVector = F)

@@ -1,5 +1,6 @@
 library(tidyverse)
 library(magrittr)
+library(jsonlite)
 setwd("D:/apm/bicikl/7.3/predicate-select/predicate-select")
 
 bp = list.files("botany_pilot",
@@ -44,6 +45,10 @@ props_ids = puerki_stack(resu.p,
                          which="labels")
 props2$id = props_ids
 
+props2 %<>%
+  arrange(desc(n)) %>%
+  mutate(perc = n/max(props2$n))
+
 occupation = stack_count(resu.r,"P106")
 
 occups = occupation %>%
@@ -51,3 +56,5 @@ occups = occupation %>%
   arrange(desc(n)) %>%
   mutate(cum = cumsum(n),
          cump = cum/sum(n))
+
+resu.r = fromJSON("bp.json",simplifyVector = F)

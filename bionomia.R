@@ -1,5 +1,6 @@
 library(tidyverse)
 library(magrittr)
+library(jsonlite)
 
 bn = read_csv("bionomia/bionomia-public-claims.csv")
 
@@ -40,6 +41,10 @@ props_ids = puerki_stack(resu_bn.p,
                          which="labels")
 props_bn2$id = props_ids
 
+props_bn2 %<>%
+  arrange(desc(n)) %>%
+  mutate(perc = n/max(props_bn2$n))
+
 occupation_bn = stack_count(resu.bn,"P106")
 
 occups_bn = occupation_bn %>%
@@ -47,3 +52,5 @@ occups_bn = occupation_bn %>%
   arrange(desc(n)) %>%
   mutate(cum = cumsum(n),
          cump = cum/sum(n))
+
+resu.bn = fromJSON("bionomia.json",simplifyVector = F)

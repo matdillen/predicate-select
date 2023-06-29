@@ -9,4 +9,16 @@ for (i in wd) {
 }
 allwd = allwd[-1,]
 
-dups = count(allwd,item)
+dups = count(allwd,item) 
+
+dupsc = dups %>%
+  count(n)
+
+dups_src = dups %>%
+  filter(n==1) %>%
+  left_join(allwd,by=c("item"="item")) %>%
+  count(src)
+
+allwd_u = filter(allwd,
+                !duplicated(item))
+

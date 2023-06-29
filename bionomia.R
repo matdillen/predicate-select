@@ -53,4 +53,4 @@ occups_bn = occupation_bn %>%
   mutate(cum = cumsum(n),
          cump = cum/sum(n))
 
-resu.bn = fromJSON("bionomia.json",simplifyVector = F)
+#resu.bn = fromJSON("bionomia.json",simplifyVector = F)

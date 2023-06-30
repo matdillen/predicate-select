@@ -1,3 +1,6 @@
+library(tidyverse)
+library(magrittr)
+
 wd = list.files(pattern = "wikidata_ids_.*")
 allwd = tibble(item = NA,src = NA)
 for (i in wd) {

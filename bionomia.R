@@ -52,8 +52,7 @@ occupation_bn = stack_count(resu.bn,"P106")
 occups_bn = occupation_bn %>%
   count(snak) %>%
   arrange(desc(n)) %>%
-  mutate(cum = cumsum(n),
-         cump = cum/sum(n))
+  mutate(perc = n/dim(checkids_bn)[1])
 
 #resu.bn = fromJSON("bionomia.json",simplifyVector = F)
 

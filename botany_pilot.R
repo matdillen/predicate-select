@@ -55,7 +55,6 @@ occupation = stack_count(resu.r,"P106")
 occups = occupation %>%
   count(snak) %>%
   arrange(desc(n)) %>%
-  mutate(cum = cumsum(n),
-         cump = cum/sum(n))
+  mutate(perc = n/dim(checkids)[1])
 
 resu.r = fromJSON("bp.json",simplifyVector = F)

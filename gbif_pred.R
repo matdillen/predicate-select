@@ -108,16 +108,14 @@ occupation = stack_count(resu.r,"P106")
 occups = occupation %>%
   count(snak) %>%
   arrange(desc(n)) %>%
-  mutate(cum = cumsum(n),
-         cump = cum/sum(n))
+  mutate(perc = n/dim(checkids)[1])
 
 fieldofwork = stack_count(resu.r,"P101")
 
 fow = fieldofwork %>%
   count(snak) %>%
   arrange(desc(n)) %>%
-  mutate(cum = cumsum(n),
-         cump = cum/sum(n))
+  mutate(perc = n/dim(checkids)[1])
 
 #resu.orcid = puerki(orcids,which = "id")
 oc_ids3 %>% cleanPIDS(which="wikidata") %>% filter(!duplicated(wikidata)) %>% dim()

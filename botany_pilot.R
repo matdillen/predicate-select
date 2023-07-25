@@ -23,7 +23,14 @@ oc_u = filter(oc,!duplicated(recordedBy_IRI)) %>%
   rename(identifier = recordedBy_IRI) %>%
   classifyPIDS()
 
-count(oc_u,type) %>% arrange(desc(n)) %>% mutate(perc = n/sum(n))
+#count(oc_u,type) %>% arrange(desc(n)) %>% mutate(perc = n/sum(n))
+
+oc_lsids = oc %>%
+  group_by(institutionID,recordedBy_IRI) %>%
+  summarize(cspp = first(cspp)) %>%
+  classifySpecimenPIDS()
+
+oc_lsids %>% make_quickstatements()
 
 checkids = oc_u %>%
   filter(type == "wikidata") %>%

@@ -41,6 +41,10 @@ oc_ids2 = pr %>%
 
 count(oc_ids2,type) %>% arrange(desc(n))
 
+pr_lsids = pr %>%
+  group_by(institutionID,recordedByID) %>%
+  summarize(occurrenceID = first(occurrenceID)) %>%
+  classifySpecimenPIDS()
 #filter(oc_ids2,type == "other") %>% count(identifier) %>% View()
 
 oc_ids3 = oc_ids2 %>%

@@ -17,6 +17,16 @@ classifyPIDS <- function(data) {
   return(data)
 }
 
+classifySpecimenPIDS <- function(data) {
+  data %<>%
+    mutate(lsid_type = case_when(grepl("botanicalcollections",cspp) ~ "MeiseBG",
+                                 grepl("jacq",cspp) ~ "JACQ",
+                                 grepl("rbge.org.uk",cspp,fixed=T) ~ "RBGE",
+                                 grepl("bgbm.org",cspp,fixed=T) ~ "BGBM",
+                                 T ~ "other"))
+  return(data)
+}
+
 cleanPIDS <- function(data,which) {
   if (which == "orcid") {
     data %<>%
@@ -182,4 +192,84 @@ filter_items_with_prop <- function(data,prop,not=F) {
   }
   new = new[-1,]
   return(new)
+}
+
+make_quickstatements <- function(data) {
+  inst = read_csv("institutions_in_wikidata.csv")
+  
+  new = data %>%
+    filter(grepl("wikidata",recordedBy_IRI))
+  
+  new %<>% 
+    left_join(inst,
+              by=c("institutionID"="institutionID")) %>%
+    ungroup() %>%
+    mutate(recordedBy_IRI = gsub(".*/","",recordedBy_IRI),
+           jacq_id = gsub("https://","",cspp,fixed=T),
+           jacq_id = gsub("http://","",cspp,fixed=T),
+           jacq_id = gsub("\\..*","",jacq_id),
+           jacq_id = ifelse(lsid_type=="JACQ",
+                            paste0("\"",
+                                   toupper(jacq_id),
+                                   "\""),
+                            NA),
+           cspp = paste0("\"",
+                         cspp,
+                         "\""),
+           ih = ifelse(is.na(jacq_id),
+                       NA,
+                       "S5858"),
+           ref_url = "S854",
+           coll_items = "P11146") %>%
+    filter(!is.na(qid)) %>%
+    select(recordedBy_IRI,
+           coll_items,
+           qid,
+           ref_url,
+           cspp,
+           ih,
+           jacq_id)
+  write_tsv(new,
+            "quickstatements.txt",
+            na="",
+            escape="none")
+}
+
+get_failed_qs <- function(batchid,
+                          size = 300) {
+  fails = fromJSON(paste0("https://quickstatements.toolforge.org/api.php?action=",
+                          "get_commands_from_batch&start=",
+                          0,
+                          "&limit=",
+                          size,
+                          "&filter=",
+                          "RUN",
+                          "&batch=",
+                          batchid))
+  
+  fails2 = tibble(recordedBy_IRI  = fails$data$json$item,
+                  qid = NA)
+  
+  for (i in 1:dim(fails2)[1]) {
+    fails2$qid[i] = fails$data$json$datavalue$value$id[[i]]
+  }
+  
+  fails2 %<>%
+    mutate(subid = paste0(recordedBy_IRI,qid))
+  
+  qs = read_tsv("quickstatements.txt") %>%
+    mutate(subid = paste0(recordedBy_IRI,qid)) %>%
+    filter(subid%in%fails2$subid) %>%
+    select(-subid) %>%
+    mutate(cspp = paste0("\"",
+                         cspp,
+                         "\""),
+           jacq_id = ifelse(is.na(jacq_id),
+                       NA,
+                       paste0("\"",jacq_id,"\"")),)
+    
+  write_tsv(qs,
+            "quickstatements_missing.txt",
+            na="",
+            escape="none")
 }

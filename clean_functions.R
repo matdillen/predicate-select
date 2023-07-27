@@ -273,3 +273,56 @@ get_failed_qs <- function(batchid,
             na="",
             escape="none")
 }
+
+remove_references <- function(data,
+                              property = "P11146",
+                              refproperty = "P5858") {
+  require(httr)
+  
+  query = paste0("https://www.wikidata.org/w/api.php?action=wbgetentities&ids=",
+                 paste(data$recordedBy_IRI,
+                       collapse="|"),
+                 "&format=json")
+  
+  data_info = content(GET(query),
+                      type = "application/json")
+  data %<>% 
+    mutate(claimid = NA,
+           hash = NA)
+  for (i in 1:length(data_info$entities)) {
+    for (j in 1:length(data_info$entities[[i]]$claims[[property]])) {
+      if (data_info$entities[[i]]$claims[[property]][[j]]$mainsnak$datavalue$value$id == data$qid[i]) {
+        for (k in 1:length(data_info$entities[[i]]$claims[[property]][[j]]$references)) {
+          if (grepl("HTTP://",
+                    data_info$entities[[i]]$claims[[property]][[j]]$references[[k]]$snaks[[refproperty]][[1]]$datavalue$value,
+                    fixed=T)) {
+            data$claimid[i] = data_info$entities[[i]]$claims[[property]][[j]]$id
+            data$hash[i] = data_info$entities[[i]]$claims[[property]][[j]]$references[[k]]$hash
+            break
+          }
+        }
+        break
+      }
+    }
+  }
+  
+  auth_status = GET("https://www.wikidata.org/w/api.php?action=query&meta=authmanagerinfo&amirequestsfor=login")
+  
+  
+  for (i in 1:dim(data)[1]) {
+    base_url = "https://www.wikidata.org/w/api.php"
+    payload = list(action = "wbremovereferences",
+                   statement = data$claimid[i],
+                   references = data$hash[i],
+                   token = token)
+    
+    headers = c("Authorization" = paste("Bearer", token))
+    
+    r = POST(base_url,
+             body = payload,
+             encode = "form")#,
+             #add_headers(.headers = headers))
+    r2 = content(r)
+    write_xml(r2,"r2.html")
+  }
+}

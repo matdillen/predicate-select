@@ -1,7 +1,7 @@
 import pywikibot
 
 #testvalues
-item_id = "Q1435048"
+item_id = "Q2115205"
 property_id = "P11146"
 target_id = "Q15820827"
 reference_string = "HTTP://LAGU"
@@ -32,10 +32,12 @@ if statement.getID() in item.get().get("claims"):
                     if refclaim_j.get("snaktype") == "value" and refclaim_j.get("datavalue").get("value") == reference_string:
                         keep_reference = False
                         do_edit = True
-                    if not keep_reference:
                         new_references.extend(refclaim)
+                        break
+                if keep_reference:
+                    break
             if do_edit:
-                claim.removeSources(new_references)
+                claim.removeSource(new_references[0], summary = "Remove reference with incorrect IH code")
                 print("remove:\n")
                 print(new_references)
                 # for reference in new_references:

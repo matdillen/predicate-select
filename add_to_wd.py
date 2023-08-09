@@ -1,7 +1,7 @@
 import pywikibot
 
 #testvalues
-item_id = "Q2115205"
+item_id = "Q33693722"
 property_id = "P11146"
 target_id = "Q15820827"
 reference_string = "HTTP://LAGU"
@@ -37,7 +37,8 @@ if statement.getID() in item.get().get("claims"):
                 if keep_reference:
                     break
             if do_edit:
-                claim.removeSource(new_references[0], summary = "Remove reference with incorrect IH code")
+                data = claim.on_item.repo.removeSources(claim,new_references, summary = "Remove reference with incorrect IH code")
+                claim.on_item.latest_revision_id = data['pageinfo']['lastrevid']
                 print("remove:\n")
                 print(new_references)
                 # for reference in new_references:
